@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GTO 레인지 뷰어 — Section 1</title>
+<style>
+:root{
+  --bg:#0B0F14; --panel:#141B22; --panel2:#1B242D; --line:#26323D;
+  --fg:#E8EEF4; --dim:#8496A5;
+  --green:#5CE08F; --red:#E8615E; --blue:#5A9BE0; --gold:#F0C05A;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+[hidden]{display:none !important;}
+html,body{height:100%;}
+body{
+  background:var(--bg); color:var(--fg); overflow:hidden;
+  font-family:Pretendard,-apple-system,BlinkMacSystemFont,system-ui,"Apple SD Gothic Neo",sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+button{font:inherit; color:inherit; background:none; border:none; cursor:pointer;}
+
+/* ---------- 레이아웃 ---------- */
+#app{height:100%; display:grid; grid-template-rows:auto 1fr;}
+
+header{
+  border-bottom:1px solid var(--line); padding:16px 24px 0;
+  background:linear-gradient(180deg,rgba(255,255,255,.03),transparent);
+}
+.hd-top{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:14px;}
+h1{font-size:19px; font-weight:800; letter-spacing:-.01em;}
+h1 b{color:var(--green);}
+.hd-sub{font-size:13px; color:var(--dim);}
+.hd-sub code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px;
+  background:var(--panel2); border:1px solid var(--line); border-radius:5px; padding:1px 6px; color:var(--fg);
+}
+.tabs{display:flex; gap:6px; flex-wrap:wrap;}
+.tab{
+  padding:9px 18px; border-radius:9px 9px 0 0; font-size:14px; font-weight:700; color:var(--dim);
+  border:1px solid transparent; border-bottom:none; position:relative; top:1px; transition:.12s;
+}
+.tab:hover{color:var(--fg); background:rgba(255,255,255,.04);}
+.tab.on{color:var(--fg); background:var(--bg); border-color:var(--line);}
+.tab.on::after{
+  content:""; position:absolute; left:12px; right:12px; top:0; height:2px; border-radius:2px; background:var(--green);
+}
+.tab .n{font-size:11px; color:var(--dim); margin-left:6px; font-weight:600;}
+
+main{overflow-y:auto; padding:22px 24px 60px;}
+.group{margin-bottom:34px;}
+.group h2{
+  font-size:13px; font-weight:800; letter-spacing:.14em; color:var(--dim);
+  padding-bottom:9px; margin-bottom:14px; border-bottom:1px solid var(--line);
+}
+.group h2 em{font-style:normal; color:var(--green);}
+.grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(330px,1fr)); gap:18px;}
+
+.card{
+  background:var(--panel); border:1px solid var(--line); border-radius:12px; overflow:hidden;
+  cursor:zoom-in; transition:border-color .12s, transform .12s;
+}
+.card:hover{border-color:var(--green); transform:translateY(-2px);}
+.card .thumb{background:#0E1419; aspect-ratio:2940/1596; overflow:hidden;}
+.card img{width:100%; height:100%; object-fit:cover; object-position:top left; display:block;}
+.card .cap{padding:11px 13px 12px; border-top:1px solid var(--line);}
+.card .cap .t{font-size:14px; font-weight:700; line-height:1.35; word-break:keep-all;}
+.card .cap .t b{color:var(--green);}
+.card .cap .m{font-size:11.5px; color:var(--dim); margin-top:5px; font-variant-numeric:tabular-nums;}
+
+/* ---------- 라이트박스 ---------- */
+#lb{position:fixed; inset:0; z-index:50; background:#05080B; display:flex; flex-direction:column;}
+#lbBar{
+  display:flex; align-items:center; gap:12px; padding:10px 14px;
+  border-bottom:1px solid var(--line); background:var(--panel); flex:0 0 auto;
+}
+#lbTitle{font-size:15px; font-weight:700; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+#lbTitle b{color:var(--green);}
+#lbBar .ct{font-size:12.5px; color:var(--dim); font-variant-numeric:tabular-nums; white-space:nowrap;}
+.lbtn{
+  padding:7px 13px; border-radius:8px; border:1px solid var(--line); background:var(--panel2);
+  font-size:13px; font-weight:600; white-space:nowrap;
+}
+.lbtn:hover{background:#26323D;}
+.lbtn.on{border-color:var(--green); color:var(--green);}
+#lbStage{
+  flex:1; overflow:hidden; position:relative; display:flex; align-items:center; justify-content:center;
+  background:
+    linear-gradient(45deg,#0A0E12 25%,transparent 25%,transparent 75%,#0A0E12 75%),
+    linear-gradient(45deg,#0A0E12 25%,#080B0F 25%,#080B0F 75%,#0A0E12 75%);
+  background-size:22px 22px; background-position:0 0,11px 11px;
+  cursor:grab; touch-action:none;
+}
+#lbStage.grabbing{cursor:grabbing;}
+#lbImg{
+  position:absolute; transform-origin:0 0; user-select:none; -webkit-user-drag:none;
+  image-rendering:auto; box-shadow:0 24px 70px rgba(0,0,0,.7);
+}
+.nav{
+  position:absolute; top:50%; transform:translateY(-50%); z-index:2;
+  width:52px; height:82px; border-radius:12px; font-size:26px; font-weight:700;
+  background:rgba(20,27,34,.82); border:1px solid var(--line); color:var(--fg); backdrop-filter:blur(6px);
+}
+.nav:hover{background:rgba(38,50,61,.95); border-color:var(--green);}
+.nav.prev{left:16px;} .nav.next{right:16px;}
+#lbHint{
+  position:absolute; left:50%; bottom:16px; transform:translateX(-50%); z-index:2;
+  font-size:12px; color:var(--dim); background:rgba(11,15,20,.85); border:1px solid var(--line);
+  border-radius:999px; padding:7px 16px; backdrop-filter:blur(6px); pointer-events:none;
+  transition:opacity .4s;
+}
+kbd{
+  font-family:inherit; font-size:11px; background:var(--panel2); border:1px solid var(--line);
+  border-radius:4px; padding:1px 5px; margin:0 2px; color:var(--fg);
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header>
+    <div class="hd-top">
+      <h1>GTO 레인지 뷰어 <b>Section 1</b></h1>
+      <div class="hd-sub">
+        원본 해상도 2940×1596 무손실 추출 · 18개 노드 ·
+        포지션 매핑 <code>EP=UTG</code> <code>MP=HJ</code> <code>LP=BTN</code> · MTT 30bb ChipEV
+      </div>
+    </div>
+    <div class="tabs" id="tabs"></div>
+  </header>
+  <main id="main"></main>
+</div>
+
+<div id="lb" hidden>
+  <div id="lbBar">
+    <button class="lbtn" id="btnClose">✕ 닫기</button>
+    <div id="lbTitle"></div>
+    <span class="ct" id="lbCount"></span>
+    <button class="lbtn" id="btnFit">맞춤</button>
+    <button class="lbtn" id="btnOne">100%</button>
+    <span class="ct" id="lbZoom"></span>
+    <button class="lbtn" id="btnRaw">원본 열기 ↗</button>
+  </div>
+  <div id="lbStage">
+    <button class="nav prev" id="btnPrev">‹</button>
+    <img id="lbImg" alt="">
+    <button class="nav next" id="btnNext">›</button>
+    <div id="lbHint">
+      <kbd>←</kbd><kbd>→</kbd> 이동 · <kbd>클릭</kbd>/<kbd>휠</kbd> 확대 · 드래그 이동 · <kbd>0</kbd> 맞춤 · <kbd>Esc</kbd> 닫기
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* PDF에서 추출한 18개 노드. pos = 최종 행동 포지션(히어로) */
+const DATA = [
+  {pos:"EP", file:"ep-1.jpg", label:"EP open range",                      w:2912, h:1594},
+  {pos:"EP", file:"ep-2.jpg", label:"EP open → MP 3bet → EP",             w:2940, h:1600},
+  {pos:"EP", file:"ep-3.jpg", label:"EP open → MP 3bet → LP 4bet → EP",   w:2940, h:1598},
+  {pos:"EP", file:"ep-4.jpg", label:"EP open → MP call → LP 3bet → EP",   w:2940, h:1592},
+  {pos:"MP", file:"mp-1.jpg", label:"MP open range",                      w:2940, h:1596},
+  {pos:"MP", file:"mp-2.jpg", label:"EP open → MP",                       w:2940, h:1590},
+  {pos:"MP", file:"mp-3.jpg", label:"MP open → LP 3bet → MP",             w:2938, h:1602},
+  {pos:"LP", file:"lp-1.jpg", label:"LP open range",                      w:2940, h:1598},
+  {pos:"LP", file:"lp-2.jpg", label:"EP open → LP",                       w:2940, h:1594},
+  {pos:"LP", file:"lp-3.jpg", label:"EP open → MP 3bet → LP",             w:2940, h:1594},
+  {pos:"LP", file:"lp-4.jpg", label:"EP open → MP call → LP",             w:2940, h:1592},
+  {pos:"SB", file:"sb-1.jpg", label:"SB open range",                      w:2940, h:1596},
+  {pos:"SB", file:"sb-2.jpg", label:"EP open → SB",                       w:2940, h:1594},
+  {pos:"SB", file:"sb-3.jpg", label:"EP open → MP call → SB",             w:2940, h:1592},
+  {pos:"SB", file:"sb-4.jpg", label:"EP open → MP call → LP call → SB",   w:2940, h:1592},
+  {pos:"BB", file:"bb-1.jpg", label:"EP open → BB",                       w:2940, h:1598},
+  {pos:"BB", file:"bb-2.jpg", label:"MP open → BB",                       w:2940, h:1598},
+  {pos:"BB", file:"bb-3.jpg", label:"LP open → BB",                       w:2940, h:1598}
+];
+const POS = [
+  {k:"ALL", name:"전체",  desc:"모든 노드"},
+  {k:"EP",  name:"EP",   desc:"UTG · 히어로가 EP"},
+  {k:"MP",  name:"MP",   desc:"HJ · 히어로가 MP"},
+  {k:"LP",  name:"LP",   desc:"BTN · 히어로가 LP"},
+  {k:"SB",  name:"SB",   desc:"히어로가 SB"},
+  {k:"BB",  name:"BB",   desc:"히어로가 BB"}
+];
+
+const $ = id => document.getElementById(id);
+let tab = "ALL";
+let view = DATA.slice();     // 현재 탭에 보이는 목록
+let idx = 0;                 // 라이트박스 인덱스
+
+/* 마지막 포지션(히어로)만 초록으로 강조 */
+function fmt(label){
+  const parts = label.split(" → ");
+  return parts.map((p,i)=> i===parts.length-1 ? "<b>"+p+"</b>" : p).join(" → ");
+}
+
+/* ---------- 탭 ---------- */
+function renderTabs(){
+  $("tabs").innerHTML = "";
+  POS.forEach(p=>{
+    const n = p.k==="ALL" ? DATA.length : DATA.filter(d=>d.pos===p.k).length;
+    const b = document.createElement("button");
+    b.className = "tab" + (tab===p.k ? " on" : "");
+    b.innerHTML = p.name + '<span class="n">' + n + '</span>';
+    b.title = p.desc;
+    b.addEventListener("click", ()=>{ tab = p.k; renderTabs(); renderGrid(); });
+    $("tabs").appendChild(b);
+  });
+}
+
+/* ---------- 그리드 ---------- */
+function renderGrid(){
+  view = tab==="ALL" ? DATA.slice() : DATA.filter(d=>d.pos===tab);
+  const groups = tab==="ALL" ? POS.filter(p=>p.k!=="ALL").map(p=>p.k) : [tab];
+  $("main").innerHTML = "";
+  groups.forEach(g=>{
+    const items = DATA.filter(d=>d.pos===g);
+    if(!items.length) return;
+    const meta = POS.find(p=>p.k===g);
+    const sec = document.createElement("section");
+    sec.className = "group";
+    sec.innerHTML = '<h2><em>' + meta.name + '</em> · ' + meta.desc + ' · ' + items.length + '개</h2>';
+    const grid = document.createElement("div");
+    grid.className = "grid";
+    items.forEach(d=>{
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML =
+        '<div class="thumb"><img loading="lazy" src="img/' + d.file + '" alt="' + d.label + '"></div>' +
+        '<div class="cap"><div class="t">' + fmt(d.label) + '</div>' +
+        '<div class="m">' + d.w + ' × ' + d.h + ' · ' + d.file + '</div></div>';
+      card.addEventListener("click", ()=> open(view.indexOf(d)));
+      grid.appendChild(card);
+    });
+    sec.appendChild(grid);
+    $("main").appendChild(sec);
+  });
+}
+
+/* ---------- 라이트박스 ---------- */
+let scale = 1, fitScale = 1, tx = 0, ty = 0, natW = 0, natH = 0;
+
+function open(i){
+  idx = i < 0 ? 0 : i;
+  $("lb").hidden = false;
+  load();
+  $("lbHint").style.opacity = "1";
+  clearTimeout(open._t);
+  open._t = setTimeout(()=>{ $("lbHint").style.opacity = "0"; }, 4000);
+}
+function close(){ $("lb").hidden = true; }
+
+function load(){
+  const d = view[idx];
+  $("lbTitle").innerHTML = fmt(d.label);
+  $("lbCount").textContent = (idx+1) + " / " + view.length;
+  const img = $("lbImg");
+  img.onload = ()=>{ natW = img.naturalWidth; natH = img.naturalHeight; fit(); };
+  img.src = "img/" + d.file;
+}
+
+function stageSize(){
+  const r = $("lbStage").getBoundingClientRect();
+  return {w:r.width, h:r.height};
+}
+function fit(){
+  const s = stageSize();
+  fitScale = Math.min((s.w-48)/natW, (s.h-48)/natH);
+  scale = fitScale;
+  tx = (s.w - natW*scale)/2;
+  ty = (s.h - natH*scale)/2;
+  apply();
+}
+function zoomTo(next, cx, cy){
+  const s = stageSize();
+  next = Math.max(fitScale*0.8, Math.min(6, next));
+  if(cx==null){ cx = s.w/2; cy = s.h/2; }
+  // 커서 아래 지점을 고정한 채 확대
+  tx = cx - (cx - tx) * (next/scale);
+  ty = cy - (cy - ty) * (next/scale);
+  scale = next;
+  clamp(); apply();
+}
+function clamp(){
+  const s = stageSize(), w = natW*scale, h = natH*scale;
+  if(w <= s.w) tx = (s.w - w)/2;
+  else tx = Math.min(0, Math.max(s.w - w, tx));
+  if(h <= s.h) ty = (s.h - h)/2;
+  else ty = Math.min(0, Math.max(s.h - h, ty));
+}
+function apply(){
+  const img = $("lbImg");
+  img.style.width = natW + "px";
+  img.style.height = natH + "px";
+  img.style.left = "0px"; img.style.top = "0px";
+  img.style.transform = "translate(" + tx + "px," + ty + "px) scale(" + scale + ")";
+  $("lbZoom").textContent = Math.round(scale*100) + "%";
+  $("btnFit").classList.toggle("on", Math.abs(scale-fitScale) < 0.005);
+  $("btnOne").classList.toggle("on", Math.abs(scale-1) < 0.005);
+}
+function step(d){
+  idx = (idx + d + view.length) % view.length;
+  load();
+}
+
+/* 드래그 팬 */
+let drag = null;
+$("lbStage").addEventListener("pointerdown", e=>{
+  if(e.target.closest(".nav")) return;
+  drag = {x:e.clientX, y:e.clientY, tx, ty, moved:false};
+  $("lbStage").classList.add("grabbing");
+  $("lbStage").setPointerCapture(e.pointerId);
+});
+$("lbStage").addEventListener("pointermove", e=>{
+  if(!drag) return;
+  const dx = e.clientX-drag.x, dy = e.clientY-drag.y;
+  if(Math.abs(dx)+Math.abs(dy) > 4) drag.moved = true;
+  tx = drag.tx + dx; ty = drag.ty + dy;
+  clamp(); apply();
+});
+$("lbStage").addEventListener("pointerup", e=>{
+  const wasDrag = drag && drag.moved;
+  drag = null;
+  $("lbStage").classList.remove("grabbing");
+  if(!wasDrag && !e.target.closest(".nav")){
+    // 클릭 = 맞춤 ↔ 100% 토글 (클릭 지점 기준)
+    const r = $("lbStage").getBoundingClientRect();
+    zoomTo(Math.abs(scale-fitScale) < 0.005 ? 1 : fitScale, e.clientX-r.left, e.clientY-r.top);
+  }
+});
+$("lbStage").addEventListener("wheel", e=>{
+  e.preventDefault();
+  const r = $("lbStage").getBoundingClientRect();
+  zoomTo(scale * (e.deltaY < 0 ? 1.15 : 1/1.15), e.clientX-r.left, e.clientY-r.top);
+}, {passive:false});
+
+$("btnClose").addEventListener("click", close);
+$("btnFit").addEventListener("click", ()=>fit());
+$("btnOne").addEventListener("click", ()=>zoomTo(1));
+$("btnRaw").addEventListener("click", ()=> window.open("img/" + view[idx].file, "_blank"));
+$("btnPrev").addEventListener("click", ()=>step(-1));
+$("btnNext").addEventListener("click", ()=>step(1));
+window.addEventListener("resize", ()=>{ if(!$("lb").hidden) fit(); });
+
+document.addEventListener("keydown", e=>{
+  if($("lb").hidden){
+    if(e.key==="Enter") open(0);
+    return;
+  }
+  if(e.key==="Escape") close();
+  else if(e.key==="ArrowLeft") step(-1);
+  else if(e.key==="ArrowRight") step(1);
+  else if(e.key==="0") fit();
+  else if(e.key==="1") zoomTo(1);
+  else if(e.key==="+"||e.key==="=") zoomTo(scale*1.25);
+  else if(e.key==="-") zoomTo(scale/1.25);
+});
+
+renderTabs();
+renderGrid();
+</script>
+</body>
+</html>

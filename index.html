@@ -7,24 +7,24 @@
 <title>GTO 레인지 — Section 1</title>
 <style>
 :root{
-  --bg:#0B0F14; --bg2:#111820; --panel:#151E27; --panel2:#1C2731; --line:#26323D;
+  --bg:#0B0F14; --panel:#151E27; --panel2:#1C2731; --line:#26323D;
   --fg:#E8EEF4; --dim:#8496A5; --dim2:#5D6E7C;
   --A:#8E3230; --R:#E8615E; --C:#7CC47C; --F:#5A9BE0;
   --gold:#F0C05A; --mint:#5CE08F;
-  --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+  --st:env(safe-area-inset-top,0px); --sb:env(safe-area-inset-bottom,0px);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
-html,body{height:100%}
+html{scroll-behavior:smooth}
 body{
-  background:var(--bg);color:var(--fg);
+  background:var(--bg);color:var(--fg);overflow-x:hidden;min-height:100%;
   font-family:Pretendard,-apple-system,BlinkMacSystemFont,system-ui,"Apple SD Gothic Neo",sans-serif;
-  -webkit-font-smoothing:antialiased;overscroll-behavior-y:none;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;padding-bottom:calc(40px + var(--sb));
 }
-button,input,select{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
-input,select{cursor:auto}
+button,input{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input{cursor:auto}
 
-/* ===== 크롭: 원본 JPEG을 CSS로 잘라 쓴다 (재인코딩 0) ===== */
+/* 원본 JPEG을 CSS로 크롭 (재인코딩 없음) */
 .crop{position:relative;overflow:hidden;width:100%;background:#0E141A;
   aspect-ratio:calc(var(--w)) / calc(var(--h))}
 .crop img{position:absolute;max-width:none;display:block;
@@ -32,195 +32,145 @@ input,select{cursor:auto}
   left:calc(-100% * var(--x) / var(--w));
   top:calc(-100% * var(--y) / var(--h))}
 
-/* ===== 상단 ===== */
-header{position:sticky;top:0;z-index:20;background:rgba(11,15,20,.96);
-  backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding-top:var(--safe-t)}
-.hd1{display:flex;align-items:center;gap:10px;padding:12px 14px 8px}
-.hd1 h1{font-size:16px;font-weight:800;letter-spacing:-.01em;flex:1;min-width:0}
-.hd1 h1 b{color:var(--mint)}
-.hd1 .info{font-size:11px;color:var(--dim2);white-space:nowrap}
-.tabs{display:flex;gap:6px;padding:0 10px 9px;overflow-x:auto;scrollbar-width:none}
-.tabs::-webkit-scrollbar{display:none}
-.tab{flex:0 0 auto;padding:8px 15px;border-radius:999px;font-size:14px;font-weight:700;
-  color:var(--dim);background:var(--panel);border:1px solid var(--line);white-space:nowrap}
-.tab.on{color:#08120C;background:var(--mint);border-color:var(--mint)}
-.tab .n{font-size:11px;opacity:.7;margin-left:5px}
+header{padding:calc(12px + var(--st)) 14px 10px;border-bottom:1px solid var(--line)}
+header h1{font-size:16px;font-weight:800}
+header h1 b{color:var(--mint)}
+header .sub{font-size:11px;color:var(--dim2);margin-top:3px}
 
-/* ===== 핸드 찾기 ===== */
-.finder{margin:12px 12px 4px;background:linear-gradient(180deg,#16212C,#121A22);
-  border:1px solid var(--line);border-radius:16px;overflow:hidden}
-.finder summary{list-style:none;padding:14px 16px;font-size:15px;font-weight:800;
-  display:flex;align-items:center;gap:9px;cursor:pointer}
-.finder summary::-webkit-details-marker{display:none}
-.finder summary .ic{width:26px;height:26px;border-radius:8px;background:var(--mint);color:#08120C;
-  display:grid;place-items:center;font-size:15px;flex:0 0 auto}
-.finder summary .cap{flex:1}
-.finder summary .ar{color:var(--dim);font-size:13px;transition:.2s}
-.finder[open] summary .ar{transform:rotate(180deg)}
-.fbody{padding:2px 14px 16px;border-top:1px solid var(--line)}
-.frow{margin-top:13px}
-.frow>label{display:block;font-size:12px;font-weight:700;color:var(--dim);
-  letter-spacing:.06em;margin-bottom:7px}
+/* ---- 스텝 ---- */
+.steps{padding:4px 12px 0}
+.step{margin-top:14px}
+.step.off{opacity:.35;pointer-events:none}
+.step .lb{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:800;
+  color:var(--dim);letter-spacing:.05em;margin-bottom:8px}
+.step .lb i{width:19px;height:19px;border-radius:50%;background:var(--panel2);
+  border:1px solid var(--line);color:var(--dim);font-style:normal;font-size:11px;
+  display:grid;place-items:center;flex:0 0 auto}
+.step.done .lb i{background:var(--mint);color:#08120C;border-color:var(--mint)}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{padding:9px 14px;border-radius:10px;font-size:14px;font-weight:700;
-  background:var(--panel2);border:1px solid var(--line);color:var(--dim)}
+.chip{padding:10px 14px;border-radius:11px;font-size:14px;font-weight:700;
+  background:var(--panel2);border:1px solid var(--line);color:var(--dim);
+  text-align:left;line-height:1.3}
+.chip small{display:block;font-size:11px;font-weight:600;opacity:.75;margin-top:2px}
 .chip.on{background:var(--mint);border-color:var(--mint);color:#08120C}
-.chip:disabled{opacity:.28}
-.hand-in{display:flex;gap:8px;align-items:center}
-.hand-in input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);
-  border-radius:11px;padding:13px 14px;font-size:17px;font-weight:700;letter-spacing:.06em;
-  text-transform:uppercase}
-.hand-in input:focus{outline:none;border-color:var(--mint)}
-.hand-in .go{padding:13px 18px;border-radius:11px;background:var(--mint);color:#08120C;
-  font-weight:800;font-size:15px;flex:0 0 auto}
-.hint{font-size:11.5px;color:var(--dim2);margin-top:7px;line-height:1.5}
+.hand-row{display:flex;gap:7px}
+.hand-row input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);
+  border-radius:11px;padding:13px 14px;font-size:18px;font-weight:800;
+  letter-spacing:.08em;text-transform:uppercase}
+.hand-row input:focus{outline:none;border-color:var(--mint)}
+.hand-row button{padding:0 15px;border-radius:11px;background:var(--panel2);
+  border:1px solid var(--line);font-size:13px;font-weight:700;flex:0 0 auto}
+.hand-row button.on{border-color:var(--mint);color:var(--mint)}
+.hint{font-size:11.5px;color:var(--dim2);margin-top:6px;line-height:1.5}
 .picker{display:grid;grid-template-columns:repeat(13,1fr);gap:2px;margin-top:9px}
 .picker button{aspect-ratio:1;border-radius:4px;background:var(--panel2);font-size:9px;
   font-weight:700;color:var(--dim);display:grid;place-items:center;padding:0}
 .picker button.p{background:#243040;color:var(--fg)}
 .picker button.on{background:var(--mint);color:#08120C}
 
-/* 결과 */
-.result{margin:12px 12px 0;border-radius:16px;overflow:hidden;border:1px solid var(--line);
-  background:var(--panel)}
-.res-hd{padding:13px 15px;background:linear-gradient(180deg,#1B2733,#151E27);
-  border-bottom:1px solid var(--line)}
-.res-hd .q{font-size:12px;color:var(--dim);font-weight:700;margin-bottom:4px}
-.res-hd .t{font-size:15px;font-weight:800;line-height:1.4}
-.res-hd .t b{color:var(--mint)}
-.verdict{padding:16px 15px;text-align:center}
-.verdict .lab{font-size:11px;letter-spacing:.16em;color:var(--dim);font-weight:800}
-.verdict .act{font-size:34px;font-weight:800;line-height:1.15;margin-top:5px}
-.verdict .sub{font-size:13px;color:var(--dim);margin-top:6px}
-.bars{padding:0 15px 15px;display:flex;flex-direction:column;gap:7px}
-.bar{display:flex;align-items:center;gap:10px}
-.bar .nm{width:88px;font-size:12.5px;font-weight:700;flex:0 0 auto;white-space:nowrap;
+/* ---- 결과 ---- */
+#out{padding:0 12px}
+.spot{margin-top:16px;padding:11px 13px;border-radius:12px;background:var(--panel);
+  border:1px solid var(--line)}
+.spot .k{font-size:10.5px;letter-spacing:.14em;color:var(--dim);font-weight:800}
+.spot .v{font-size:14.5px;font-weight:700;line-height:1.4;margin-top:3px;word-break:keep-all}
+.spot .v b{color:var(--mint)}
+.ans{margin-top:12px;border-radius:14px;overflow:hidden;border:1px solid #2A3B33;
+  background:linear-gradient(180deg,#132019,#101820)}
+.ans .top{padding:15px 14px 12px;text-align:center}
+.ans .lab{font-size:10.5px;letter-spacing:.16em;color:var(--dim);font-weight:800}
+.ans .act{font-size:36px;font-weight:800;line-height:1.1;margin-top:4px}
+.ans .sub{font-size:13px;color:var(--dim);margin-top:5px}
+.bars{padding:0 14px 14px;display:flex;flex-direction:column;gap:6px}
+.bar{display:flex;align-items:center;gap:9px}
+.bar .nm{width:84px;font-size:12.5px;font-weight:700;flex:0 0 auto;white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis}
-.bar .tr{flex:1;height:22px;background:#0D1218;border-radius:6px;overflow:hidden}
+.bar .tr{flex:1;height:21px;background:#0B1016;border-radius:6px;overflow:hidden}
 .bar .fl{height:100%;border-radius:6px;min-width:2px}
-.bar .pc{width:46px;text-align:right;font-size:13px;font-weight:800;flex:0 0 auto;
+.bar .pc{width:44px;text-align:right;font-size:13px;font-weight:800;flex:0 0 auto;
   font-variant-numeric:tabular-nums}
-.res-more{display:flex;gap:8px;padding:0 15px 15px}
-.res-more button{flex:1;padding:12px;border-radius:11px;background:var(--panel2);
-  border:1px solid var(--line);font-size:13.5px;font-weight:700;text-align:center}
-.res-warn{margin:0 15px 15px;padding:11px 13px;border-radius:10px;background:#1E1608;
-  border:1px solid #4A3616;color:var(--gold);font-size:12.5px;line-height:1.5}
+.note{margin:0 14px 14px;padding:10px 12px;border-radius:10px;background:#1E1608;
+  border:1px solid #4A3616;color:var(--gold);font-size:12px;line-height:1.5}
+.none{margin-top:12px;padding:20px 14px;text-align:center;border-radius:14px;
+  border:1px solid var(--line);background:var(--panel)}
+.none .t{font-size:22px;font-weight:800;color:var(--dim)}
+.none .d{font-size:12.5px;color:var(--dim2);margin-top:6px;line-height:1.5}
 
-/* ===== 리스트 ===== */
-main{padding:6px 12px calc(40px + var(--safe-b))}
-.group{margin-top:20px}
-.group h2{font-size:12px;font-weight:800;letter-spacing:.14em;color:var(--dim);
-  padding-bottom:8px;margin-bottom:11px;border-bottom:1px solid var(--line)}
-.group h2 em{font-style:normal;color:var(--mint)}
-.grid{display:grid;grid-template-columns:1fr;gap:12px}
-@media(min-width:620px){.grid{grid-template-columns:1fr 1fr}}
-@media(min-width:1000px){.grid{grid-template-columns:1fr 1fr 1fr}}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
-  overflow:hidden;cursor:pointer;display:block;width:100%;text-align:left}
-.card:active{border-color:var(--mint)}
-.card .cap{padding:11px 13px}
-.card .cap .t{font-size:14.5px;font-weight:700;line-height:1.4;word-break:keep-all}
-.card .cap .t b{color:var(--mint)}
-.card .cap .m{font-size:11px;color:var(--dim2);margin-top:4px}
-
-/* ===== 상세 ===== */
-#detail{position:fixed;inset:0;z-index:40;background:var(--bg);
-  display:flex;flex-direction:column}
-.dt-hd{position:sticky;top:0;z-index:5;background:rgba(11,15,20,.97);backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--line);padding-top:var(--safe-t)}
-.dt-r1{display:flex;align-items:center;gap:10px;padding:10px 12px}
-.dt-back{width:40px;height:40px;border-radius:11px;background:var(--panel2);
-  border:1px solid var(--line);font-size:19px;display:grid;place-items:center;flex:0 0 auto}
-.dt-ttl{flex:1;min-width:0}
-.dt-ttl .pos{font-size:10.5px;letter-spacing:.16em;color:var(--dim);font-weight:800}
-.dt-ttl .t{font-size:16px;font-weight:800;line-height:1.32;word-break:keep-all;margin-top:2px}
-.dt-ttl .t b{color:var(--mint)}
-.dt-ct{font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums;flex:0 0 auto}
-#dtBody{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
-  padding:0 0 calc(76px + var(--safe-b))}
-.sec{margin:14px 12px 0}
-.sec>h3{font-size:11.5px;font-weight:800;letter-spacing:.14em;color:var(--dim);
-  margin-bottom:8px;display:flex;align-items:center;gap:8px}
-.sec>h3 .tag{background:var(--panel2);border:1px solid var(--line);color:var(--dim);
-  padding:2px 8px;border-radius:999px;letter-spacing:0;font-size:10.5px}
+/* ---- 자료 ---- */
+.sec{margin-top:16px}
+.sec h3{font-size:11.5px;font-weight:800;letter-spacing:.13em;color:var(--dim);
+  margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.sec h3 .tg{background:var(--panel2);border:1px solid var(--line);color:var(--dim2);
+  padding:2px 8px;border-radius:999px;letter-spacing:0;font-size:10.5px;font-weight:700}
 .shell{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#0E141A}
-.zoomwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.zoomwrap>div{width:calc(100% * var(--z))}
-.zoombar{display:flex;align-items:center;gap:10px;margin-top:9px}
-.zoombar input[type=range]{flex:1;accent-color:var(--mint);height:26px}
-.zoombar .v{font-size:12px;color:var(--dim);font-weight:700;width:48px;text-align:right;
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.zoombar{display:flex;align-items:center;gap:9px;margin-top:8px}
+.zoombar input[type=range]{flex:1;accent-color:var(--mint);height:26px;min-width:0}
+.zoombar .v{font-size:12px;color:var(--dim);font-weight:700;width:46px;text-align:right;
   font-variant-numeric:tabular-nums}
-.zoombar .rst{padding:6px 12px;border-radius:9px;background:var(--panel2);
-  border:1px solid var(--line);font-size:12px;font-weight:700}
-.dt-nav{position:fixed;left:0;right:0;bottom:0;z-index:6;display:flex;gap:9px;
-  padding:9px 12px calc(9px + var(--safe-b));background:rgba(11,15,20,.97);
-  backdrop-filter:blur(12px);border-top:1px solid var(--line)}
-.dt-nav button{flex:1;padding:13px;border-radius:12px;background:var(--panel2);
-  border:1px solid var(--line);font-size:14px;font-weight:700}
-.dt-nav button:disabled{opacity:.3}
+.zoombar .rst{padding:6px 11px;border-radius:9px;background:var(--panel2);
+  border:1px solid var(--line);font-size:12px;font-weight:700;flex:0 0 auto}
 .hl{position:absolute;border:3px solid var(--gold);border-radius:3px;
-  box-shadow:0 0 0 2px rgba(0,0,0,.55),0 0 16px rgba(240,192,90,.75);pointer-events:none;z-index:2}
+  box-shadow:0 0 0 2px rgba(0,0,0,.6),0 0 18px rgba(240,192,90,.8);
+  pointer-events:none;z-index:2;animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 2px rgba(0,0,0,.6),0 0 4px rgba(240,192,90,.35)}}
+
+/* ---- 둘러보기 ---- */
+details.browse{margin:22px 12px 0;border:1px solid var(--line);border-radius:14px;
+  background:var(--panel);overflow:hidden}
+details.browse summary{list-style:none;padding:14px 15px;font-size:14px;font-weight:800;
+  display:flex;align-items:center;gap:8px;cursor:pointer}
+details.browse summary::-webkit-details-marker{display:none}
+details.browse summary .ar{margin-left:auto;color:var(--dim);font-size:12px}
+details.browse[open] summary .ar{transform:rotate(180deg)}
+.bgrid{padding:0 12px 14px;display:grid;grid-template-columns:1fr;gap:11px}
+@media(min-width:620px){.bgrid{grid-template-columns:1fr 1fr}}
+@media(min-width:1000px){.bgrid{grid-template-columns:1fr 1fr 1fr}}
+.bcard{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0E141A;
+  text-align:left;width:100%}
+.bcard img{width:100%;height:auto;display:block}
+.bcard .c{padding:9px 11px;font-size:13px;font-weight:700;line-height:1.35;word-break:keep-all}
+.bcard .c b{color:var(--mint)}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="hd1">
-    <h1>GTO 레인지 <b>Section 1</b></h1>
-    <div class="info">MTT 30bb · EP=UTG MP=HJ LP=BTN</div>
-  </div>
-  <div class="tabs" id="tabs"></div>
+  <h1>GTO 레인지 <b>Section 1</b></h1>
+  <div class="sub">MTT 30bb ChipEV · EP=UTG · MP=HJ · LP=BTN</div>
 </header>
 
-<details class="finder" id="finder">
-  <summary><span class="ic">⌕</span><span class="cap">내 상황 · 내 핸드로 찾기</span><span class="ar">▼</span></summary>
-  <div class="fbody">
-    <div class="frow">
-      <label>1 · 내 자리</label>
-      <div class="chips" id="fPos"></div>
-    </div>
-    <div class="frow">
-      <label>2 · 상황 (앞사람 액션)</label>
-      <div class="chips" id="fNode"></div>
-    </div>
-    <div class="frow">
-      <label>3 · 내 핸드</label>
-      <div class="hand-in">
-        <input id="fHand" placeholder="예: AKs, QQ, T9o" maxlength="4" autocomplete="off"
-               autocapitalize="characters" spellcheck="false">
-        <button class="go" id="fGo">찾기</button>
-      </div>
-      <div class="hint">직접 입력하거나 아래 표에서 탭하세요 · 대각선=포켓, 위=수딧, 아래=오프수딧</div>
-      <div class="picker" id="fPick"></div>
-    </div>
+<div class="steps">
+  <div class="step" id="s1">
+    <div class="lb"><i>1</i>내 자리</div>
+    <div class="chips" id="cPos"></div>
   </div>
-</details>
-
-<div id="result"></div>
-<main id="main"></main>
-
-<div id="detail" hidden>
-  <div class="dt-hd">
-    <div class="dt-r1">
-      <button class="dt-back" id="dtBack">←</button>
-      <div class="dt-ttl">
-        <div class="pos" id="dtPos"></div>
-        <div class="t" id="dtTitle"></div>
-      </div>
-      <div class="dt-ct" id="dtCount"></div>
-    </div>
+  <div class="step off" id="s2">
+    <div class="lb"><i>2</i>앞에서 무슨 일이 있었나</div>
+    <div class="chips" id="cNode"></div>
   </div>
-  <div id="dtBody"></div>
-  <div class="dt-nav">
-    <button id="dtPrev">‹ 이전</button>
-    <button id="dtNext">다음 ›</button>
+  <div class="step off" id="s3">
+    <div class="lb"><i>3</i>내 핸드 <span style="font-weight:600;letter-spacing:0">(선택)</span></div>
+    <div class="hand-row">
+      <input id="hIn" placeholder="AKs · QQ · T9o" maxlength="4" autocomplete="off"
+             autocapitalize="characters" spellcheck="false" inputmode="text">
+      <button id="hTog">표에서 고르기</button>
+    </div>
+    <div class="hint">비우면 차트만 봅니다 · 넣으면 그 핸드 정답이 바로 나옵니다</div>
+    <div class="picker" id="pick" hidden></div>
   </div>
 </div>
+
+<div id="out"></div>
+
+<details class="browse" id="browse">
+  <summary>전체 18개 노드 둘러보기 <span class="ar">▼</span></summary>
+  <div class="bgrid" id="bgrid"></div>
+</details>
 
 <script>
 "use strict";
 
-/* ============ 노드 정의 (원본 기하 포함) ============ */
 const NODES = [
  {id:"ep-1",pos:"EP",label:"EP open range",                   w:2912,h:1594,split:1721,top:408},
  {id:"ep-2",pos:"EP",label:"EP open → MP 3bet → EP",          w:2940,h:1600,split:1727,top:414},
@@ -241,280 +191,173 @@ const NODES = [
  {id:"bb-2",pos:"BB",label:"MP open → BB",                    w:2940,h:1598,split:1727,top:413},
  {id:"bb-3",pos:"BB",label:"LP open → BB",                    w:2940,h:1598,split:1727,top:413}
 ];
-const POS = [
- {k:"ALL",n:"전체"},{k:"EP",n:"EP",d:"UTG"},{k:"MP",n:"MP",d:"HJ"},
- {k:"LP",n:"LP",d:"BTN"},{k:"SB",n:"SB"},{k:"BB",n:"BB"}
-];
-const ACT_NAME = {A:"올인",R:"레이즈",C:"콜",F:"폴드"};
-const ACT_COLOR = {A:"var(--A)",R:"var(--R)",C:"var(--C)",F:"var(--F)"};
-const RANKS = "AKQJT98765432".split("");
+const POS=[{k:"EP",d:"UTG"},{k:"MP",d:"HJ"},{k:"LP",d:"BTN"},{k:"SB"},{k:"BB"}];
+const ACT_KO={A:"올인",R:"레이즈",C:"콜",F:"폴드"};
+const COL={A:"var(--A)",R:"var(--R)",C:"var(--C)",F:"var(--F)"};
+const RANKS="AKQJT98765432".split("");
 
-let DB = null;                       // ranges.json
-let tab = "ALL";
-let list = NODES.slice();
-let idx = 0;
+let DB=null, selPos=null, selNode=null, selHand="", zoom=100;
+const $=id=>document.getElementById(id);
+const nodeOf=id=>NODES.find(n=>n.id===id);
 
-const $ = id => document.getElementById(id);
-const nodeOf = id => NODES.find(n=>n.id===id);
-
-/* 마지막 포지션만 강조 */
-function fmt(s){
-  const p = s.split(" → ");
-  return p.map((x,i)=> i===p.length-1 ? "<b>"+x+"</b>" : x).join(" → ");
+/* 앞 상황만 짧게 (마지막 "→ 내 자리" 제거) */
+function shortLabel(n){
+  if(/open range$/.test(n.label)) return "아무도 안 들어옴";
+  return n.label.replace(new RegExp("\\s*→\\s*"+n.pos+"$"),"");
 }
-/* 크롭 3종 */
-function rects(n){
-  return {
-    bar:  {x:0,        y:84,      w:n.w,        h:252},
-    chart:{x:0,        y:n.top-8, w:n.split,    h:n.h-(n.top-8)-6},
-    panel:{x:n.split,  y:n.top-62,w:n.w-n.split,h:n.h-(n.top-62)-6}
-  };
+function fmtSpot(n){
+  const p=n.label.split(" → ");
+  return p.map((x,i)=>i===p.length-1?"<b>"+x+"</b>":x).join(" → ");
 }
-function cropHTML(n,r,cls){
-  return '<div class="crop'+(cls?" "+cls:"")+'" style="--iw:'+n.w+';--x:'+r.x+';--y:'+r.y+
-         ';--w:'+r.w+';--h:'+r.h+'"><img src="img/'+n.id+'.jpg" alt="" loading="lazy"></div>';
+function rects(n){return{
+  bar:{x:0,y:84,w:n.w,h:252},
+  chart:{x:0,y:n.top-8,w:n.split,h:n.h-(n.top-8)-6},
+  panel:{x:n.split,y:n.top-62,w:n.w-n.split,h:n.h-(n.top-62)-6}};}
+function crop(n,r){
+  return '<div class="crop" style="--iw:'+n.w+';--x:'+r.x+';--y:'+r.y+';--w:'+r.w+';--h:'+r.h+
+         '"><img src="img/'+n.id+'.jpg" alt="" loading="lazy"></div>';
 }
-
-/* ============ 탭 & 리스트 ============ */
-function renderTabs(){
-  $("tabs").innerHTML = "";
-  POS.forEach(p=>{
-    const cnt = p.k==="ALL" ? NODES.length : NODES.filter(n=>n.pos===p.k).length;
-    const b = document.createElement("button");
-    b.className = "tab"+(tab===p.k?" on":"");
-    b.innerHTML = p.n + '<span class="n">'+cnt+'</span>';
-    b.onclick = ()=>{ tab=p.k; renderTabs(); renderList(); };
-    $("tabs").appendChild(b);
-  });
-}
-function renderList(){
-  list = tab==="ALL" ? NODES.slice() : NODES.filter(n=>n.pos===tab);
-  const groups = tab==="ALL" ? POS.filter(p=>p.k!=="ALL").map(p=>p.k) : [tab];
-  $("main").innerHTML = "";
-  groups.forEach(g=>{
-    const items = NODES.filter(n=>n.pos===g);
-    if(!items.length) return;
-    const meta = POS.find(p=>p.k===g);
-    const sec = document.createElement("section");
-    sec.className="group";
-    sec.innerHTML = '<h2><em>'+meta.n+'</em>'+(meta.d?" · "+meta.d:"")+' · '+items.length+'개</h2>';
-    const gr = document.createElement("div"); gr.className="grid";
-    items.forEach(n=>{
-      const b = document.createElement("button");
-      b.className="card";
-      b.innerHTML = '<img src="img/thumb/'+n.id+'.jpg" alt="" loading="lazy" '+
-                    'style="width:100%;height:auto;display:block">'+
-                    '<div class="cap"><div class="t">'+fmt(n.label)+'</div>'+
-                    '<div class="m">'+n.id+'</div></div>';
-      b.onclick = ()=>openDetail(list.indexOf(n)<0?NODES.indexOf(n):list.indexOf(n), n.id);
-      gr.appendChild(b);
-    });
-    sec.appendChild(gr); $("main").appendChild(sec);
-  });
-}
-
-/* ============ 상세 ============ */
-let hlHand = null;                   // 강조할 핸드
-
-function openDetail(i, id, hand){
-  if(id){ const j=list.findIndex(n=>n.id===id); idx = j>=0?j:0; }
-  else idx = i;
-  hlHand = hand || null;
-  $("detail").hidden = false;
-  document.body.style.overflow="hidden";
-  renderDetail();
-  if(!history.state || history.state.v!=="detail")
-    history.pushState({v:"detail"},"","#"+list[idx].id);
-}
-function closeDetail(){
-  $("detail").hidden = true;
-  document.body.style.overflow="";
-  hlHand = null;
-}
-function renderDetail(){
-  const n = list[idx], r = rects(n);
-  const meta = POS.find(p=>p.k===n.pos);
-  $("dtPos").textContent = "히어로 "+n.pos+(meta&&meta.d?" ("+meta.d+")":"");
-  $("dtTitle").innerHTML = fmt(n.label);
-  $("dtCount").textContent = (idx+1)+" / "+list.length;
-  $("dtPrev").disabled = list.length<2;
-  $("dtNext").disabled = list.length<2;
-
-  let hlBox = "";
-  if(hlHand && DB){
-    const g = cellRect(n, hlHand);
-    if(g) hlBox = '<div class="hl" style="left:'+g.l+'%;top:'+g.t+'%;width:'+g.w+'%;height:'+g.h+'%"></div>';
-  }
-  $("dtBody").innerHTML =
-    (hlHand ? handSummary(n, hlHand) : "") +
-    '<section class="sec"><h3>① 상황 <span class="tag">← 옆으로 밀어서 보기</span></h3>'+
-      '<div class="shell zoomwrap" id="bw"><div style="width:280%">'+cropHTML(n,r.bar)+'</div></div>'+
-      '</section>'+
-    '<section class="sec"><h3>② 레인지 차트 <span class="tag">메인</span></h3>'+
-      '<div class="shell zoomwrap" id="zw"><div style="position:relative">'+
-        cropHTML(n,r.chart)+hlBox+'</div></div>'+
-      '<div class="zoombar"><button class="rst" id="zr">맞춤</button>'+
-        '<input type="range" id="zs" min="100" max="400" step="5" value="100">'+
-        '<span class="v" id="zv">100%</span></div></section>'+
-    '<section class="sec"><h3>③ 요약 <span class="tag">액션별 비율 · 핸드</span></h3>'+
-      '<div class="shell">'+cropHTML(n,r.panel)+'</div></section>';
-
-  const zw=$("zw"), zs=$("zs"), zv=$("zv");
-  zw.style.setProperty("--z",1);
-  const apply=()=>{ const z=zs.value/100; zw.firstElementChild.style.width=(z*100)+"%";
-                    zv.textContent=zs.value+"%"; };
-  zs.oninput=apply; $("zr").onclick=()=>{ zs.value=100; apply(); zw.scrollLeft=0; };
-  apply();
-  $("dtBody").scrollTop = 0;
-}
-/* 상세 상단: 찾은 핸드의 정답 요약 */
-function handSummary(n, hand){
-  if(!DB || !DB[n.id]) return "";
-  const rec=DB[n.id], mix=rec.hands[hand];
-  if(!mix) return '<section class="sec"><div class="shell" style="padding:14px;text-align:center">'+
-    '<div style="font-size:13px;color:var(--dim)">'+hand+' — 이 상황에 도달하지 않는 핸드</div></div></section>';
-  const ks=Object.keys(mix).filter(k=>k!=="_r").sort((a,b)=>mix[b]-mix[a]);
-  const top=ks[0];
-  return '<section class="sec"><div class="shell" style="padding:14px;text-align:center">'+
-    '<div style="font-size:11px;letter-spacing:.14em;color:var(--dim);font-weight:800">'+
-      hand+' · '+(ks.length>1?"혼합 전략":"정답")+'</div>'+
-    '<div style="font-size:27px;font-weight:800;margin-top:4px;color:'+ACT_COLOR[top]+'">'+
-      rec.acts[top]+'</div>'+
-    '<div style="font-size:12.5px;color:var(--dim);margin-top:5px">'+
-      ks.map(k=>rec.acts[k]+" "+mix[k]+"%").join(" · ")+'</div>'+
-    '<div style="font-size:11.5px;color:var(--gold);margin-top:7px">↓ 차트에서 노란 테두리</div>'+
-    '</div></section>';
-}
-/* 그리드 셀의 차트 크롭 내 상대 위치(%) */
-function cellRect(n, hand){
-  const r = rects(n).chart;
-  const left=28, cw=128, top=n.top, bot=n.h-29, ch=(bot-top+1)/13;
+function cellRect(n,hand){
+  const r=rects(n).chart, left=28, cw=128, top=n.top, ch=(n.h-29-top+1)/13;
   let ri,ci;
-  if(hand.length===2){ ri=ci=RANKS.indexOf(hand[0]); }
-  else{
-    const a=RANKS.indexOf(hand[0]), b=RANKS.indexOf(hand[1]);
-    if(hand[2]==="s"){ ri=Math.min(a,b); ci=Math.max(a,b); }
-    else { ri=Math.max(a,b); ci=Math.min(a,b); }
-  }
-  if(ri<0||ci<0) return null;
-  const x=left+ci*cw, y=top+ri*ch;
-  return {l:(x-r.x)/r.w*100, t:(y-r.y)/r.h*100, w:cw/r.w*100, h:ch/r.h*100};
+  if(hand.length===2){ri=ci=RANKS.indexOf(hand[0]);}
+  else{const a=RANKS.indexOf(hand[0]),b=RANKS.indexOf(hand[1]);
+       if(hand[2]==="s"){ri=Math.min(a,b);ci=Math.max(a,b);} else {ri=Math.max(a,b);ci=Math.min(a,b);}}
+  if(ri<0||ci<0)return null;
+  return {l:(left+ci*cw-r.x)/r.w*100, t:(top+ri*ch-r.y)/r.h*100,
+          w:cw/r.w*100, h:ch/r.h*100};
 }
-function step(d){
-  idx = (idx+d+list.length)%list.length;
-  hlHand = null;
-  renderDetail();
-  history.replaceState({v:"detail"},"","#"+list[idx].id);
-}
-$("dtBack").onclick = ()=>history.back();
-$("dtPrev").onclick = ()=>step(-1);
-$("dtNext").onclick = ()=>step(1);
-window.addEventListener("popstate", ()=>{ if(!$("detail").hidden) closeDetail(); });
-document.addEventListener("keydown", e=>{
-  if($("detail").hidden) return;
-  if(e.key==="Escape") history.back();
-  else if(e.key==="ArrowLeft") step(-1);
-  else if(e.key==="ArrowRight") step(1);
-});
-
-/* ============ 핸드 찾기 ============ */
-let selPos=null, selNode=null, selHand="";
-
 function normHand(s){
   s=(s||"").trim().toUpperCase().replace(/10/g,"T");
-  if(!/^[AKQJT98765432]{2}[SO]?$/.test(s)) return null;
-  let a=s[0],b=s[1],t=s[2]||"";
-  if(a===b) return a+b;                       // 포켓
-  const ia=RANKS.indexOf(a), ib=RANKS.indexOf(b);
-  const hi=ia<ib?a:b, lo=ia<ib?b:a;
-  if(!t) return null;
-  return hi+lo+t.toLowerCase();
+  if(!/^[AKQJT98765432]{2}[SO]?$/.test(s))return null;
+  const a=s[0],b=s[1],t=s[2]||"";
+  if(a===b)return a+b;
+  if(!t)return null;
+  const ia=RANKS.indexOf(a),ib=RANKS.indexOf(b);
+  return (ia<ib?a+b:b+a)+t.toLowerCase();
 }
-function renderFinder(){
-  $("fPos").innerHTML="";
-  POS.filter(p=>p.k!=="ALL").forEach(p=>{
+
+/* ---------- 스텝 렌더 ---------- */
+function renderSteps(){
+  $("cPos").innerHTML="";
+  POS.forEach(p=>{
     const b=document.createElement("button");
     b.className="chip"+(selPos===p.k?" on":"");
-    b.textContent=p.n+(p.d?" ("+p.d+")":"");
-    b.onclick=()=>{ selPos=p.k; selNode=null; renderFinder(); runFind(); };
-    $("fPos").appendChild(b);
+    b.innerHTML=p.k+(p.d?'<small>'+p.d+'</small>':'<small>&nbsp;</small>');
+    b.onclick=()=>{selPos=p.k;selNode=null;renderSteps();render();};
+    $("cPos").appendChild(b);
   });
-  $("fNode").innerHTML="";
-  const ns = selPos?NODES.filter(n=>n.pos===selPos):[];
-  if(!ns.length){
-    $("fNode").innerHTML='<span class="hint">자리를 먼저 고르세요</span>';
-  } else ns.forEach(n=>{
+  $("s1").className="step"+(selPos?" done":"");
+
+  $("cNode").innerHTML="";
+  const ns=selPos?NODES.filter(n=>n.pos===selPos):[];
+  ns.forEach(n=>{
     const b=document.createElement("button");
     b.className="chip"+(selNode===n.id?" on":"");
-    b.textContent=n.label.replace(" → "+n.pos,"").replace(n.pos+" ","");
-    b.title=n.label;
-    b.onclick=()=>{ selNode=n.id; renderFinder(); runFind(); };
-    $("fNode").appendChild(b);
+    b.textContent=shortLabel(n);
+    b.onclick=()=>{selNode=n.id;renderSteps();render();
+      if(history.state?.v!=="spot") history.pushState({v:"spot"},"","#"+n.id);
+      else history.replaceState({v:"spot"},"","#"+n.id);};
+    $("cNode").appendChild(b);
   });
-  const pk=$("fPick");
-  if(!pk.dataset.built){
-    pk.dataset.built="1";
-    for(let r=0;r<13;r++)for(let c=0;c<13;c++){
-      const h = r===c?RANKS[r]+RANKS[r]:(r<c?RANKS[r]+RANKS[c]+"s":RANKS[c]+RANKS[r]+"o");
-      const b=document.createElement("button");
-      b.textContent=h; b.dataset.h=h;
-      if(r===c) b.className="p";
-      b.onclick=()=>{ $("fHand").value=h; selHand=h; markPick(); runFind(); };
-      pk.appendChild(b);
-    }
-  }
+  $("s2").className="step"+(selPos?"":" off")+(selNode?" done":"");
+  $("s3").className="step"+(selNode?"":" off")+(selHand?" done":"");
   markPick();
+}
+function buildPicker(){
+  const pk=$("pick");
+  for(let r=0;r<13;r++)for(let c=0;c<13;c++){
+    const h=r===c?RANKS[r]+RANKS[r]:(r<c?RANKS[r]+RANKS[c]+"s":RANKS[c]+RANKS[r]+"o");
+    const b=document.createElement("button");
+    b.textContent=h;b.dataset.h=h;
+    if(r===c)b.className="p";
+    b.onclick=()=>{$("hIn").value=h;selHand=h;renderSteps();render();};
+    pk.appendChild(b);
+  }
 }
 function markPick(){
-  [...$("fPick").children].forEach(b=>
-    b.classList.toggle("on", b.dataset.h===selHand));
+  [...$("pick").children].forEach(b=>b.classList.toggle("on",b.dataset.h===selHand));
 }
-function runFind(){
-  const box=$("result");
-  const h=normHand($("fHand").value);
-  selHand = h||"";
-  markPick();
-  if(!selPos||!selNode||!h){ box.innerHTML=""; return; }
-  if(!DB){ box.innerHTML='<div class="result"><div class="verdict"><div class="sub">데이터 불러오는 중…</div></div></div>'; return; }
-  const n=nodeOf(selNode), rec=DB[selNode];
-  const mix=rec.hands[h];
-  const q='<div class="res-hd"><div class="q">'+n.pos+' · '+h+'</div>'+
-          '<div class="t">'+fmt(n.label)+'</div></div>';
-  if(!mix){
-    box.innerHTML='<div class="result">'+q+
-      '<div class="verdict"><div class="lab">결과</div><div class="act" style="color:var(--dim)">해당 없음</div>'+
-      '<div class="sub">'+h+'는 이 상황에 도달하지 않습니다<br>(앞 단계에서 이미 폴드되는 핸드)</div></div>'+
-      '<div class="res-more"><button id="rOpen">차트에서 보기</button></div></div>';
-    $("rOpen").onclick=()=>openDetail(0,selNode,h);
-    return;
-  }
-  const reach = mix._r;
-  const ks=Object.keys(mix).filter(k=>k!=="_r").sort((a,b)=>mix[b]-mix[a]);
-  const top=ks[0];
-  const bars=ks.map(k=>
-    '<div class="bar"><div class="nm">'+rec.acts[k]+'</div>'+
-    '<div class="tr"><div class="fl" style="width:'+mix[k]+'%;background:'+ACT_COLOR[k]+'"></div></div>'+
-    '<div class="pc">'+mix[k]+'%</div></div>').join("");
-  const mixed = ks.length>1;
-  box.innerHTML='<div class="result">'+q+
-    '<div class="verdict"><div class="lab">'+(mixed?"주 액션 (혼합 전략)":"정답")+'</div>'+
-    '<div class="act" style="color:'+ACT_COLOR[top]+'">'+rec.acts[top]+'</div>'+
-    '<div class="sub">'+(mixed
-        ? ks.map(k=>ACT_NAME[k]+" "+mix[k]+"%").join(" · ")
-        : "100% "+ACT_NAME[top])+'</div></div>'+
-    '<div class="bars">'+bars+'</div>'+
-    (reach?'<div class="res-warn">이 핸드는 해당 상황에 <b>'+reach+'%</b>만 도달합니다. 앞 단계에서 일부는 다른 선택을 하기 때문입니다.</div>':"")+
-    '<div class="res-more"><button id="rOpen">전체 차트에서 위치 보기</button></div></div>';
-  $("rOpen").onclick=()=>openDetail(0,selNode,h);
-}
-$("fGo").onclick=runFind;
-$("fHand").addEventListener("input",()=>{ selHand=normHand($("fHand").value)||""; markPick(); runFind(); });
-$("fHand").addEventListener("keydown",e=>{ if(e.key==="Enter"){e.preventDefault();$("fHand").blur();runFind();} });
 
-/* ============ 시작 ============ */
-renderTabs(); renderList(); renderFinder();
-fetch("ranges.json").then(r=>r.json()).then(d=>{ DB=d; runFind(); })
-  .catch(()=>{ DB=null; });
+/* ---------- 본문 ---------- */
+function render(){
+  const box=$("out");
+  if(!selNode){ box.innerHTML=""; return; }
+  const n=nodeOf(selNode), r=rects(n);
+  const rec=DB?DB[selNode]:null;
+  const mix=(rec&&selHand)?rec.hands[selHand]:undefined;
+
+  let ans="";
+  if(selHand){
+    if(!rec) ans='<div class="none"><div class="t">…</div><div class="d">데이터 불러오는 중</div></div>';
+    else if(!mix) ans='<div class="none"><div class="t">해당 없음</div>'+
+      '<div class="d"><b>'+selHand+'</b>는 이 상황에 도달하지 않습니다.<br>앞 단계에서 이미 폴드되는 핸드입니다.</div></div>';
+    else{
+      const ks=Object.keys(mix).filter(k=>k!=="_r").sort((a,b)=>mix[b]-mix[a]);
+      const top=ks[0], mixed=ks.length>1;
+      ans='<div class="ans"><div class="top">'+
+        '<div class="lab">'+selHand+' · '+(mixed?"혼합 전략":"정답")+'</div>'+
+        '<div class="act" style="color:'+COL[top]+'">'+rec.acts[top]+'</div>'+
+        '<div class="sub">'+(mixed?ks.map(k=>ACT_KO[k]+" "+mix[k]+"%").join(" · ")
+                                   :"100% "+ACT_KO[top])+'</div></div>'+
+        '<div class="bars">'+ks.map(k=>
+          '<div class="bar"><div class="nm">'+rec.acts[k]+'</div><div class="tr">'+
+          '<div class="fl" style="width:'+mix[k]+'%;background:'+COL[k]+'"></div></div>'+
+          '<div class="pc">'+mix[k]+'%</div></div>').join("")+'</div>'+
+        (mix._r?'<div class="note">이 핸드는 해당 상황에 <b>'+mix._r+'%</b>만 도달합니다. 앞 단계에서 일부는 다른 선택을 하기 때문입니다.</div>':"")+
+        '</div>';
+    }
+  }
+  const hl=(selHand&&mix)?(()=>{const g=cellRect(n,selHand);
+      return g?'<div class="hl" style="left:'+g.l+'%;top:'+g.t+'%;width:'+g.w+'%;height:'+g.h+'%"></div>':"";})():"";
+
+  box.innerHTML=
+    '<div class="spot"><div class="k">지금 상황</div><div class="v">'+fmtSpot(n)+'</div></div>'+
+    ans+
+    '<section class="sec"><h3>레인지 차트'+(hl?' <span class="tg">노란 칸이 '+selHand+'</span>':'')+'</h3>'+
+      '<div class="shell scroll" id="zw"><div style="position:relative">'+crop(n,r.chart)+hl+'</div></div>'+
+      '<div class="zoombar"><button class="rst" id="zr">맞춤</button>'+
+      '<input type="range" id="zs" min="100" max="400" step="5" value="'+zoom+'">'+
+      '<span class="v" id="zv">'+zoom+'%</span></div></section>'+
+    '<section class="sec"><h3>액션별 비율 · 핸드 <span class="tg">원본 요약</span></h3>'+
+      '<div class="shell">'+crop(n,r.panel)+'</div></section>'+
+    '<section class="sec"><h3>테이블 액션 <span class="tg">← 옆으로 밀기</span></h3>'+
+      '<div class="shell scroll"><div style="width:280%">'+crop(n,r.bar)+'</div></div></section>';
+
+  const zw=$("zw"),zs=$("zs"),zv=$("zv");
+  const apply=()=>{zoom=+zs.value;zw.firstElementChild.style.width=zoom+"%";zv.textContent=zoom+"%";};
+  zs.oninput=apply; $("zr").onclick=()=>{zs.value=100;apply();zw.scrollLeft=0;};
+  apply();
+}
+
+/* ---------- 둘러보기 ---------- */
+function renderBrowse(){
+  const g=$("bgrid"); g.innerHTML="";
+  NODES.forEach(n=>{
+    const b=document.createElement("button");
+    b.className="bcard";
+    b.innerHTML='<img src="img/thumb/'+n.id+'.jpg" alt="" loading="lazy">'+
+                '<div class="c">'+fmtSpot(n)+'</div>';
+    b.onclick=()=>{
+      selPos=n.pos; selNode=n.id; renderSteps(); render();
+      $("browse").open=false;
+      window.scrollTo({top:0,behavior:"smooth"});
+    };
+    g.appendChild(b);
+  });
+}
+
+/* ---------- 이벤트 ---------- */
+$("hIn").addEventListener("input",()=>{selHand=normHand($("hIn").value)||"";renderSteps();render();});
+$("hIn").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("hIn").blur();}});
+$("hTog").onclick=()=>{const p=$("pick");p.hidden=!p.hidden;$("hTog").classList.toggle("on",!p.hidden);};
+window.addEventListener("popstate",()=>{
+  if(selNode){ selNode=null; selHand=""; $("hIn").value=""; renderSteps(); render();
+               window.scrollTo({top:0}); }
+});
+
+buildPicker(); renderSteps(); renderBrowse();
+fetch("ranges.json").then(r=>r.json()).then(d=>{DB=d;render();}).catch(()=>{});
 </script>
 </body>
 </html>
